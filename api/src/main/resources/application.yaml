@@ -16,3 +16,11 @@ spring:
     enabled: true
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      acks: all
+      properties:
+        max.block.ms: 2000          # don't hang for 60s if Kafka is down
+        request.timeout.ms: 1000
+        delivery.timeout.ms: 2000

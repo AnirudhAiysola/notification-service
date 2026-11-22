@@ -47,4 +47,7 @@ public class NotificationEntity {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    @Column(name = "published_at")
+    private Instant publishedAt;
 }
