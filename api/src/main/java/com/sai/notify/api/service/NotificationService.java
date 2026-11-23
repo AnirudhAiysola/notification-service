@@ -3,6 +3,7 @@ package com.sai.notify.api.service;
 import com.sai.notify.api.domain.Priority;
 import com.sai.notify.api.dto.NotificationRequest;
 import com.sai.notify.api.entity.NotificationEntity;
+import com.sai.notify.api.kafka.NotificationPublisher;
 import com.sai.notify.api.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,6 +22,7 @@ public class NotificationService {
     private static final Duration LOW_DEFAULT_TTL  = Duration.ofHours(24);
 
     private final NotificationRepository repository;
+    private final NotificationPublisher publisher;
 
 
     /**
@@ -53,9 +55,11 @@ public class NotificationService {
                 .userId(request.userId())
                 .build();
 
-        // TODO 4: Save it, and handle the race condition:
            try {
                NotificationEntity saved = repository.saveAndFlush(entity);
+               if(publisher.publish(saved)){
+                   repository.markPublished(saved.getId(), now);
+               }
                return saved.getId();
            } catch (DataIntegrityViolationException e) {
                return repository.findByIdempotencyKey(request.idempotencyKey())
